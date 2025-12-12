@@ -3,67 +3,101 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { Trash2 } from "lucide-react"
 
 const API_URL = "http://localhost:8080"
 
 export function NoteList() {
   const [notes, setNotes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [token, setToken] = useState<string | null>(null)
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-
-    if (!token) {
-      setLoading(false)
-      return
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    if (savedToken) {
+      setToken(savedToken);
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
     }
+  }, []);
 
-    fetch(`${API_URL}/notes`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        const data = await res.json()
-        console.log("DEBUG RESPONSE:", data)
+  useEffect(() => {
+    if (token) {
+      fetchNotes();
+    }
+  }, [token]);
 
-        let list = []
+  const fetchNotes = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/notes`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      console.log('Notes data:', data); // Debug: check what data looks like
+      setNotes(data.data || []);
+    } catch (err) {
+      console.error('Error fetching notes:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (Array.isArray(data)) {
-          list = data
-        } else if (data.data) {
-          list = data.data
-        } else if (data.notes) {
-          list = data.notes
-        }
+  const deleteNote = async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/note/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-        setNotes(list)
-      })
-      .catch((err) => console.error("Error:", err))
-      .finally(() => setLoading(false))
-  }, [])
+      if (res.ok) {
+        fetchNotes(); // Refresh the list
+      }
+    } catch (err) {
+      console.error('Error deleting note:', err);
+    }
+  };
 
-  if (loading) return <p>Loading...</p>
+  if (loading) {
+    return <div className="text-center py-8">Loading notes...</div>;
+  }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {notes.map((note) => (
-        <Link key={note.id} href={`/dashboard/note/${note.id}`}>
-          <Card className="h-full transition-colors hover:bg-accent">
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {notes.length === 0 ? (
+        <div className="col-span-full bg-white rounded-2xl shadow-lg p-12 text-center">
+          <p className="text-gray-500 text-lg">No notes yet. Create your first note!</p>
+        </div>
+      ) : (
+        notes.map((note) => (
+          <Link key={note.ID} href={`/dashboard/note/${note.ID}`}>
+          <Card key={note.ID} className="hover:shadow-xl transition">
             <CardHeader>
-              <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-lg text-balance">{note.title}</CardTitle>
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-xl">{note.Title || 'Untitled'}</CardTitle>
+                <button
+                  onClick={() => deleteNote(note.ID)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
               <CardDescription>
-                {note.created_at?.slice(0, 10) || "-"}
+                {note.CreatedAt ? new Date(note.CreatedAt).toLocaleDateString() : 'No date'}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="line-clamp-3 text-sm text-muted-foreground text-pretty">
-                {note.content}
+              <p className="text-gray-600 whitespace-pre-wrap">
+                {note.Content || 'No content'}
               </p>
             </CardContent>
           </Card>
-        </Link>
-      ))}
+          </Link>
+        ))
+      )}
     </div>
   )
 }

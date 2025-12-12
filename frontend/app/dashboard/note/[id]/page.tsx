@@ -1,3 +1,7 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Edit, Trash2 } from "lucide-react"
@@ -5,27 +9,48 @@ import Link from "next/link"
 
 const API_URL = "http://localhost:8080"
 
-export default async function NoteDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default function NoteDetailPage() {
+  const params = useParams()
+  const id = params?.id as string
 
-  // --- Fetch note by ID ---
-  async function getNote() {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
+  const [note, setNote] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-    const res = await fetch(`${API_URL}/notes/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    })
+  useEffect(() => {
+    if (!id) return
 
-    if (!res.ok) return null
+    async function getNote() {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        setLoading(false)
+        return
+      }
 
-    const data = await res.json()
-    return data.data
+      const res = await fetch(`${API_URL}/notes/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setNote(data.data)
+      }
+
+      setLoading(false)
+    }
+
+    getNote()
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    )
   }
-
-  const note = await getNote()
 
   if (!note) {
     return (
@@ -65,9 +90,9 @@ export default async function NoteDetailPage({ params }: { params: { id: string 
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <CardTitle className="text-3xl text-balance">{note.title}</CardTitle>
+                <CardTitle className="text-3xl text-balance">{note.Title}</CardTitle>
                 <CardDescription className="mt-2">
-                  Created on {note.created_at?.slice(0, 10) || "-"} · Notes
+                  Created on {note.CreatedAt?.slice(0, 10) || "-"} · Notes
                 </CardDescription>
               </div>
               <span className="shrink-0 rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">
@@ -77,7 +102,7 @@ export default async function NoteDetailPage({ params }: { params: { id: string 
           </CardHeader>
           <CardContent>
             <div className="prose prose-neutral dark:prose-invert max-w-none">
-              <p className="whitespace-pre-wrap text-pretty leading-relaxed">{note.content}</p>
+              <p className="whitespace-pre-wrap text-pretty leading-relaxed">{note.Content}</p>
             </div>
           </CardContent>
         </Card>
