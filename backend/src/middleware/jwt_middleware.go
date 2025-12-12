@@ -31,8 +31,9 @@ func JWTMiddleware(c *fiber.Ctx) error {
 		return c.Status(401).JSON(fiber.Map{"message": "Invalid or expired token"})
 	}
 
-	// simpan token ke context Fiber untuk controller yang butuh
-	c.Locals("user", token)
+	// Extract claims and store user_id
+	claims := token.Claims.(jwt.MapClaims)
+	c.Locals("user_id", claims["user_id"])
 
 	return c.Next()
 }

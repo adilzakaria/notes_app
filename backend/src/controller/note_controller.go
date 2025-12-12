@@ -1,27 +1,28 @@
 package controller
 
 import (
-	// "fmt"
 	"notes-backend/src/config"
 	"notes-backend/src/model"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 // =========================
 // HELPER: Ambil User ID dari JWT
 // =========================
 func GetUserID(c *fiber.Ctx) uint {
-	user := c.Locals("user")
-	if user == nil {
+	// Get user_id that was set by JWT middleware
+	userID := c.Locals("user_id")
+	if userID == nil {
 		return 0
 	}
 
-	token := user.(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
+	// JWT stores numbers as float64
+	idFloat, ok := userID.(float64)
+	if !ok {
+		return 0
+	}
 
-	idFloat := claims["user_id"].(float64)
 	return uint(idFloat)
 }
 
@@ -30,39 +31,36 @@ func GetUserID(c *fiber.Ctx) uint {
 // =======================================
 func CreateNote(c *fiber.Ctx) error {
 	userID := GetUserID(c)
+	if userID == 0 {
+		return c.Status(401).JSON(fiber.Map{"message": "Unauthorized"})
+	}
 
-	title := c.FormValue("title")
-	content := c.FormValue("content")
+	// Parse JSON body
+	var req struct {
+		Title   string `json:"title"`
+		Content string `json:"content"`
+	}
 
-	// handle upload image (optional)
-	// imageFile, err := c.FormFile("image")
-	// var imageURL string
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(400).JSON(fiber.Map{"message": "Invalid JSON"})
+	}
 
-	// if err == nil && imageFile != nil {
-	// 	path := fmt.Sprintf("./uploads/%s", imageFile.Filename)
-	// 	if err := c.SaveFile(imageFile, path); err != nil {
-	// 		return c.Status(500).JSON(fiber.Map{"message": "Failed to upload image"})
-	// 	}
-	// 	imageURL = "/uploads/" + imageFile.Filename
-	// }
-
-	if title == "" {
+	if req.Title == "" {
 		return c.Status(400).JSON(fiber.Map{"message": "Title is required"})
 	}
 
 	note := model.Note{
-		UserID:   userID,
-		Title:    title,
-		Content:  content,
-		// ImageURL: imageURL,
+		UserID:  userID,
+		Title:   req.Title,
+		Content: req.Content,
 	}
 
 	if err := config.DB.Create(&note).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"message": "Failed to create note"})
+		return c.Status(500).JSON(fiber.Map{"message": "Failed to create note", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "Note created",
+	return c.Status(201).JSON(fiber.Map{
+		"message": "Note created successfully",
 		"note":    note,
 	})
 }
@@ -72,13 +70,19 @@ func CreateNote(c *fiber.Ctx) error {
 // =======================================
 func GetNotes(c *fiber.Ctx) error {
 	userID := GetUserID(c)
+	if userID == 0 {
+		return c.Status(401).JSON(fiber.Map{"message": "Unauthorized"})
+	}
 
 	var notes []model.Note
 	if err := config.DB.Where("user_id = ?", userID).Order("id DESC").Find(&notes).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"message": "Failed to get notes"})
+		return c.Status(500).JSON(fiber.Map{"message": "Failed to get notes", "error": err.Error()})
 	}
 
-	return c.JSON(notes)
+	return c.JSON(fiber.Map{
+		"message": "Notes retrieved successfully",
+		"data":    notes,
+	})
 }
 
 // =======================================
@@ -86,6 +90,10 @@ func GetNotes(c *fiber.Ctx) error {
 // =======================================
 func DeleteNote(c *fiber.Ctx) error {
 	userID := GetUserID(c)
+	if userID == 0 {
+		return c.Status(401).JSON(fiber.Map{"message": "Unauthorized"})
+	}
+
 	id := c.Params("id")
 
 	var note model.Note
@@ -95,12 +103,14 @@ func DeleteNote(c *fiber.Ctx) error {
 
 	// verify ownership
 	if note.UserID != userID {
-		return c.Status(403).JSON(fiber.Map{"message": "Not authorized"})
+		return c.Status(403).JSON(fiber.Map{"message": "Not authorized to delete this note"})
 	}
 
 	if err := config.DB.Delete(&note).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"message": "Failed to delete"})
+		return c.Status(500).JSON(fiber.Map{"message": "Failed to delete", "error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message": "Note deleted"})
+	return c.JSON(fiber.Map{
+		"message": "Note deleted successfully",
+	})
 }
