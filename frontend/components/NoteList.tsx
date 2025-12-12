@@ -1,49 +1,48 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 
-// Mock data - replace with real data from your database
-const notes = [
-  {
-    id: "1",
-    title: "Meeting Notes",
-    content: "Discussed project timeline and deliverables for Q1. Key points include...",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    title: "Recipe Ideas",
-    content: "New recipes to try this week: pasta carbonara, chicken stir-fry...",
-    createdAt: "2024-01-14",
-  },
-  {
-    id: "3",
-    title: "Book Summary",
-    content: "Atomic Habits by James Clear - key takeaways and implementation strategies...",
-    createdAt: "2024-01-13",
-  },
-  {
-    id: "4",
-    title: "Travel Plans",
-    content: "Summer vacation planning - destinations, budget, and activities to research...",
-    createdAt: "2024-01-12",
-  },
-  {
-    id: "5",
-    title: "Code Snippets",
-    content: "Useful React patterns and TypeScript utilities for future reference...",
-    createdAt: "2024-01-11",
-  },
-  {
-    id: "6",
-    title: "Fitness Goals",
-    content: "Monthly fitness targets and workout routines to follow...",
-    createdAt: "2024-01-10",
-  },
-]
+const API_URL = "http://localhost:8080"
 
 export function NoteList() {
+  const [notes, setNotes] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+
+    if (!token) {
+      setLoading(false)
+      return
+    }
+
+    fetch(`${API_URL}/notes`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        const data = await res.json()
+        console.log("DEBUG RESPONSE:", data)
+
+        let list = []
+
+        if (Array.isArray(data)) {
+          list = data
+        } else if (data.data) {
+          list = data.data
+        } else if (data.notes) {
+          list = data.notes
+        }
+
+        setNotes(list)
+      })
+      .catch((err) => console.error("Error:", err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <p>Loading...</p>
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {notes.map((note) => (
@@ -53,10 +52,14 @@ export function NoteList() {
               <div className="flex items-start justify-between gap-2">
                 <CardTitle className="text-lg text-balance">{note.title}</CardTitle>
               </div>
-              <CardDescription>{note.createdAt}</CardDescription>
+              <CardDescription>
+                {note.created_at?.slice(0, 10) || "-"}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="line-clamp-3 text-sm text-muted-foreground text-pretty">{note.content}</p>
+              <p className="line-clamp-3 text-sm text-muted-foreground text-pretty">
+                {note.content}
+              </p>
             </CardContent>
           </Card>
         </Link>

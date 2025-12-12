@@ -35,8 +35,18 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
+
+  # frontend:
+  #   build:    
+  #     context: ../frontend
+  #     dockerfile: Dockerfile
+  #   container_name: notes_frontend
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - backend
 
   adminer:
     image: adminer
