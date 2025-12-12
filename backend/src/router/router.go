@@ -8,6 +8,8 @@ import (
 
 func SetupRoutes(app *fiber.App) {
 
+	app.Use(middleware.LoggingMiddleware)
+
 	app.Post("/auth/register", controller.Register)
 	app.Post("/auth/login", controller.Login)
 
@@ -15,4 +17,6 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/notes/:id", middleware.JWTMiddleware, controller.GetNoteByID)
 	app.Post("/notes", middleware.JWTMiddleware, controller.CreateNote)
 	app.Delete("/notes/:id", middleware.JWTMiddleware, controller.DeleteNote)
+
+	app.Get("/logs", middleware.JWTMiddleware, controller.GetLogs)
 }
