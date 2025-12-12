@@ -12,7 +12,7 @@ func SetupRoutes(app *fiber.App) {
 	app.Post("/auth/login", controller.Login)
 
 	app.Get("/notes", middleware.JWTMiddleware, controller.GetNotes)
-	app.Get("/notes/:id", middleware.JWTMiddleware, controller.GetNotes)
+	app.Get("/notes/:id", middleware.JWTMiddleware, controller.GetNoteByID)
 	app.Post("/notes", middleware.JWTMiddleware, controller.CreateNote)
 	app.Delete("/notes/:id", middleware.JWTMiddleware, controller.DeleteNote)
 }

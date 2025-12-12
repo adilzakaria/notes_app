@@ -5,25 +5,30 @@ import (
 	"notes-backend/src/model"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 // =========================
 // HELPER: Ambil User ID dari JWT
 // =========================
-func GetUserID(c *fiber.Ctx) uint {
+func GetUserID(c *fiber.Ctx) uuid.UUID {
 	// Get user_id that was set by JWT middleware
 	userID := c.Locals("user_id")
 	if userID == nil {
-		return 0
+		return uuid.Nil
 	}
 
-	// JWT stores numbers as float64
-	idFloat, ok := userID.(float64)
+	idStr, ok := userID.(string)
 	if !ok {
-		return 0
+		return uuid.Nil
 	}
 
-	return uint(idFloat)
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return uuid.Nil
+	}
+
+	return id
 }
 
 // =======================================
@@ -31,7 +36,7 @@ func GetUserID(c *fiber.Ctx) uint {
 // =======================================
 func CreateNote(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	if userID == 0 {
+	if userID == uuid.Nil {
 		return c.Status(401).JSON(fiber.Map{"message": "Unauthorized"})
 	}
 
@@ -70,7 +75,7 @@ func CreateNote(c *fiber.Ctx) error {
 // =======================================
 func GetNotes(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	if userID == 0 {
+	if userID == uuid.Nil {
 		return c.Status(401).JSON(fiber.Map{"message": "Unauthorized"})
 	}
 
@@ -85,12 +90,39 @@ func GetNotes(c *fiber.Ctx) error {
 	})
 }
 
+func GetNoteByID(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	if userID == uuid.Nil {
+		return c.Status(401).JSON(fiber.Map{"message": "Unauthorized"})
+	}
+
+	noteID := c.Params("id")
+	if noteID == "" {
+		return c.Status(400).JSON(fiber.Map{"message": "Note ID is required"})
+	}
+
+	var note model.Note
+	if err := config.DB.First(&note, "id = ?", noteID).Error; err != nil {
+		return c.Status(404).JSON(fiber.Map{"message": "Note not found"})
+	}
+
+	// verify ownership
+	if note.UserID != userID {
+		return c.Status(403).JSON(fiber.Map{"message": "Not authorized to access this note"})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Note retrieved successfully",
+		"data":    note,
+	})
+}
+
 // =======================================
 // DELETE NOTE
 // =======================================
 func DeleteNote(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	if userID == 0 {
+	if userID == uuid.Nil {
 		return c.Status(401).JSON(fiber.Map{"message": "Unauthorized"})
 	}
 

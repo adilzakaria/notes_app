@@ -1,10 +1,14 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Note struct {
 	ID        uint      `gorm:"primaryKey"`
-	UserID    uint
+	UserID    uuid.UUID `gorm:"type:uuid"`
 	Title     string
 	Content   string
 	// ImageURL  string
