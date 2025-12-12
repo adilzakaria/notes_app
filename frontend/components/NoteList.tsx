@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
-import { Trash2 } from "lucide-react"
 
 const API_URL = "http://localhost:8080"
 
@@ -46,21 +45,6 @@ export function NoteList() {
     }
   };
 
-  const deleteNote = async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/note/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        fetchNotes(); // Refresh the list
-      }
-    } catch (err) {
-      console.error('Error deleting note:', err);
-    }
-  };
-
   if (loading) {
     return <div className="text-center py-8">Loading notes...</div>;
   }
@@ -78,12 +62,6 @@ export function NoteList() {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <CardTitle className="text-xl">{note.Title || 'Untitled'}</CardTitle>
-                <button
-                  onClick={() => deleteNote(note.ID)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                >
-                  <Trash2 size={18} />
-                </button>
               </div>
               <CardDescription>
                 {note.CreatedAt ? new Date(note.CreatedAt).toLocaleDateString() : 'No date'}

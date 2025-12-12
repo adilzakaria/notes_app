@@ -4,8 +4,9 @@ import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Edit, Trash2 } from "lucide-react"
+import { ArrowLeft, Edit } from "lucide-react"
 import Link from "next/link"
+import { DeleteButton } from "@/components/Delete"
 
 const API_URL = "http://localhost:8080"
 
@@ -72,14 +73,13 @@ export default function NoteDetailPage() {
               </Link>
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
+              {/* <Button variant="outline" size="sm" asChild>
+                <Link href={`/dashboard/edit/${id}`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </Button> */}
+              <DeleteButton id={id} />
             </div>
           </div>
         </div>
