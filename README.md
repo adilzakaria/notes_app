@@ -148,18 +148,18 @@ NEXT_PUBLIC_API_URL=http://localhost:8080
 
 ### Halaman Register
 
-![Login Page](screenshots/register.jpg)
+![Login Page](screenshots/register.png)
 
 ### Halaman Login
-![Login Page](screenshots/login.jpg)
+![Login Page](screenshots/login.png)
 
 ### Dashboard Notes
 
-![Dashboard](screenshots/dashboard.jpg)
+![Dashboard](screenshots/dashboard.png)
 
 ### Detail Note
 
-![Note Detail](screenshots/detail.jpg)
+![Note Detail](screenshots/detail.png)
 
 ---
 
