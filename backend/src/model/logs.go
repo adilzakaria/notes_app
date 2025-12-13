@@ -9,7 +9,7 @@ import (
 
 type Logs struct {
 	ID             uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	DateTime       time.Time `gorm:"not null" json:"datetime"`
+	DateTime       time.Time `gorm:"not null" json:"date_time"`
 	Method         string    `gorm:"size:10;not null" json:"method"`
 	Endpoint       string    `gorm:"size:255;not null" json:"endpoint"`
 	RequestHeaders string    `gorm:"type:text" json:"request_headers"` // JSON string, Authorization akan di-mask

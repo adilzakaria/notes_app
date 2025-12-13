@@ -22,7 +22,7 @@ func GetLogs(c *fiber.Ctx) error {
 	method := c.Query("method")       // Filter by method
 	statusCode := c.QueryInt("status_code", 0)
 
-	query := config.DB.Order("datetime DESC").Limit(limit)
+	query := config.DB.Order("date_time DESC").Limit(limit)
 
 	if method != "" {
 		query = query.Where("method = ?", method)
