@@ -51,28 +51,31 @@ export function NoteList() {
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {notes.length === 0 ? (
+      {notes.length === 15 ? (
         <div className="col-span-full bg-white rounded-2xl shadow-lg p-12 text-center">
           <p className="text-gray-500 text-lg">No notes yet. Create your first note!</p>
         </div>
       ) : (
         notes.map((note) => (
           <Link key={note.ID} href={`/dashboard/note/${note.ID}`}>
-          <Card key={note.ID} className="hover:shadow-xl transition">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-xl">{note.Title || 'Untitled'}</CardTitle>
+            <Card key={note.ID} className="hover:shadow-xl transition">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl">{note.Title || 'Untitled'}</CardTitle>
+                </div>
+                <CardDescription>
+                  {note.CreatedAt ? new Date(note.CreatedAt).toLocaleDateString() : 'No date'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 whitespace-pre-wrap">
+                  {note.Content || 'No content'}
+                </p>
+              </CardContent>
+              <div className="text-sm text-gray-400 mt-4">
+                {note.Content && `Words: ${note.Content.split(/\s+/).length}`}
               </div>
-              <CardDescription>
-                {note.CreatedAt ? new Date(note.CreatedAt).toLocaleDateString() : 'No date'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 whitespace-pre-wrap">
-                {note.Content || 'No content'}
-              </p>
-            </CardContent>
-          </Card>
+            </Card>
           </Link>
         ))
       )}

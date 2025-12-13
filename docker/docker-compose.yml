@@ -1,9 +1,10 @@
 version: "3.9"
 
 services:
+  # PostgreSQL Database
   postgres:
     image: postgres:15
-    container_name: postgres
+    container_name: notes_postgres
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -13,13 +14,15 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    command: ["postgres", "-c", "shared_preload_libraries=uuid-ossp"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - notes_network
 
+  # Backend (Go API)
   backend:
     build:
       context: ../backend
@@ -32,22 +35,32 @@ services:
       DB_PASSWORD: postgres
       DB_NAME: notes_app
       DB_PORT: 5432
+      PORT: 8080
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - notes_network
 
-  # frontend:
-  #   build:    
-  #     context: ../frontend
-  #     dockerfile: Dockerfile
-  #   container_name: notes_frontend
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - backend
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: notes_frontend
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - notes_network
 
+  # Adminer (Database UI - Optional, remove in production)
   adminer:
     image: adminer
     container_name: notes_adminer
@@ -56,6 +69,13 @@ services:
       - "8081:8080"
     depends_on:
       - postgres
+    networks:
+      - notes_network
 
 volumes:
   postgres_data:
+    driver: local
+
+networks:
+  notes_network:
+    driver: bridge

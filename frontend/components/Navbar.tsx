@@ -27,10 +27,10 @@ export function Navbar() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="gap-2">
+            {/* <Button variant="ghost" size="sm" className="gap-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Profile</span>
-            </Button>
+            </Button> */}
             <Button variant="ghost" size="sm" className="gap-2" asChild>
               <Link href="/">
                 <LogOut className="h-4 w-4" />
