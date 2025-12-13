@@ -1,0 +1,94 @@
+# Screenshots folder
+screenshots/
+
+# Environment variables
+.env
+.env.local
+.env*.local
+*.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Node.js (Frontend)
+node_modules/
+.npm
+.yarn
+.pnp
+.pnp.js
+
+# Next.js (Frontend)
+.next/
+out/
+build/
+dist/
+.vercel
+
+# Go (Backend)
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+vendor/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.dockerignore
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.lib
+
+# Testing
+coverage/
+.nyc_output
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Production
+build/
+dist/
+
+# Misc
+.cache/
+.parcel-cache/
+.turbo/
