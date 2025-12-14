@@ -1,9 +1,9 @@
-import { RegisterPage as RegisterPageComponent } from "@/components/RegisterPage"
+import { LoginPage as LoginPageComponent } from "@/components/LoginPage"
 
-export default function RegisterPage() {
+export default function LoginPage() {
     return (
         <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-            <RegisterPageComponent />
+            <LoginPageComponent />
         </div>
     )
 }

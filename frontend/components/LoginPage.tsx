@@ -51,9 +51,9 @@ export function LoginPage() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-balance">Create an account</CardTitle>
+        <CardTitle className="text-2xl font-bold text-balance">Login an account</CardTitle>
         <CardDescription className="text-balance">
-          Enter your details below to create your notes account
+          Enter your email and password
         </CardDescription>
       </CardHeader>
 
@@ -96,9 +96,9 @@ export function LoginPage() {
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium underline underline-offset-4 hover:text-primary">
-              Sign in
+            Don't have an account yet?{" "}
+            <Link href="/register" className="font-medium underline underline-offset-4 hover:text-primary">
+              Sign up
             </Link>
           </p>
         </CardFooter>
